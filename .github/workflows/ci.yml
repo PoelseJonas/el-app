@@ -1,0 +1,37 @@
+name: CI
+
+# Runs on PRs into staging/main and again after they are merged.
+# Pushes to feature branches do not trigger CI until a PR is opened.
+on:
+  pull_request:
+    branches: [staging, main]
+  push:
+    branches: [staging, main]
+
+# A newer run on the same PR or branch cancels the older one.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    # Branch protection requires a check with this exact name. Rename both together.
+    name: Format, lint, typecheck, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # Installs exactly what package-lock.json says and fails if it is out of sync.
+      - run: npm ci
+      # Fastest checks first, so failures show up quickly.
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
