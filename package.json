@@ -17,6 +17,12 @@
     "test:watch": "vitest",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm test"
   },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-tailwindcss"
+    ],
+    "tailwindStylesheet": "./src/app/globals.css"
+  },
   "dependencies": {
     "next": "16.4.3",
     "react": "19.3.1",

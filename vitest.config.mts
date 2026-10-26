@@ -12,7 +12,7 @@ export default defineConfig({
   test: {
     // Simulated browser DOM, so components can be rendered in tests.
     environment: "jsdom",
-    setupFiles: ["./vitest.setup.ts"],
+    setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
     exclude: ["node_modules", ".next"],
   },
