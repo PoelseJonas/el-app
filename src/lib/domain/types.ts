@@ -6,10 +6,12 @@
 /** Danish bidding zones: DK1 = Jutland and Funen, DK2 = Zealand and islands. */
 export type PriceArea = "DK1" | "DK2";
 
-export type Utility = "electricity" | "heating" | "hotWater" | "coldWater";
+/** What a meter measures. Only electricity can be combined with prices and CO2. */
+export type ConsumptionType =
+  "electricity" | "heating" | "hotWater" | "coldWater";
 
-/** Length of the interval a data point covers. */
-export type Resolution = "5min" | "15min" | "hour" | "day" | "month";
+/** How long a period one data point covers, e.g. "15min" for a 15-minute price. */
+export type IntervalLength = "5min" | "15min" | "hour" | "day" | "month";
 
 /** Half-open interval: `start` is included, `end` is not. */
 export interface DateRange {
@@ -20,7 +22,7 @@ export interface DateRange {
 /** Spot price for one interval, converted from DKK/MWh. Excludes tariffs, taxes and VAT. */
 export interface PricePoint {
   start: Date;
-  resolution: Resolution;
+  intervalLength: IntervalLength;
   priceArea: PriceArea;
   priceDkkPerKwh: number;
 }
@@ -28,7 +30,7 @@ export interface PricePoint {
 /** CO2 intensity of the grid for one interval. */
 export interface Co2Point {
   start: Date;
-  resolution: Resolution;
+  intervalLength: IntervalLength;
   priceArea: PriceArea;
   co2GramPerKwh: number;
   /** True for forecasts (used for "best hours tomorrow"), false for measured values. */
@@ -37,11 +39,11 @@ export interface Co2Point {
 
 export type ConsumptionUnit = "kWh" | "m3" | "heatUnits";
 
-/** A meter in DataHub (or a demo/CSV stand-in). Measures exactly one utility. */
+/** A meter in DataHub (or a demo/CSV stand-in). Measures exactly one consumption type. */
 export interface MeteringPoint {
   /** 18-digit DataHub ID. Personal data: never log it or put a real one in fixtures. */
   id: string;
-  utility: Utility;
+  consumptionType: ConsumptionType;
   /** Name shown in the UI, e.g. an address or "Demo". */
   label: string;
   /** Unknown for demo/CSV data; then the price area chosen in settings is used. */
@@ -49,13 +51,13 @@ export interface MeteringPoint {
 }
 
 /**
- * Metered consumption for one interval. Generic over utilities, so the unit is a field
+ * Metered consumption for one interval. Covers all consumption types, so the unit is a field
  * rather than part of the name. Only electricity in kWh is combined with prices and CO2.
  */
 export interface ConsumptionPoint {
   meteringPointId: string;
   start: Date;
-  resolution: Resolution;
+  intervalLength: IntervalLength;
   quantity: number;
   unit: ConsumptionUnit;
 }
