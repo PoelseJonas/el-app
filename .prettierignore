@@ -1,6 +1,9 @@
+# Build output and generated files
 .next
 out
 build
 coverage
-package-lock.json
 next-env.d.ts
+
+# Managed by npm
+package-lock.json

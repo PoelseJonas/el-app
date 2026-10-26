@@ -2,6 +2,7 @@ version: 2
 updates:
   - package-ecosystem: npm
     directory: /
+    # Updates go through staging like any other change, never straight to main.
     target-branch: staging
     schedule:
       interval: weekly
@@ -9,7 +10,7 @@ updates:
       prefix: chore
       include: scope
     groups:
-      # Minor and patch updates arrive as one PR per week instead of one per package.
+      # Minor and patch updates arrive as one PR per week. Major updates get their own PR.
       minor-and-patch:
         update-types: [minor, patch]
 
