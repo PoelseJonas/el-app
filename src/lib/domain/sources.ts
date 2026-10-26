@@ -6,9 +6,9 @@ import type {
   Co2Point,
   ConsumptionPoint,
   DateRange,
+  MeteringPoint,
   PriceArea,
   PricePoint,
-  Utility,
 } from "./types";
 
 export interface PriceSource {
@@ -24,10 +24,11 @@ export interface ConsumptionSource {
   id: string;
   /** Name shown in settings (Danish). */
   label: string;
-  utilities: readonly Utility[];
+  /** The meters this source can read. Mirrors Eloverblik: list meters first, then fetch data. */
+  getMeteringPoints(): Promise<MeteringPoint[]>;
   /** Returns an empty array, not an error, when there is no data for the range. */
   getConsumption(
     range: DateRange,
-    utility: Utility,
+    meteringPointId: string,
   ): Promise<ConsumptionPoint[]>;
 }
