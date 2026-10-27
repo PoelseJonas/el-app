@@ -7,21 +7,22 @@ import {
   Settings,
   type LucideIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 interface NavItem {
   href: string;
-  label: string;
+  /** Key under "nav" in src/i18n/messages/*.json. */
+  labelKey: "today" | "usage" | "insights" | "settings";
   icon: LucideIcon;
 }
 
-// TODO: move labels to the dictionary (nav.*) when next-intl is set up.
 const NAV_ITEMS: readonly NavItem[] = [
-  { href: "/", label: "I dag", icon: House },
-  { href: "/usage", label: "Forbrug", icon: ChartColumn },
-  { href: "/insights", label: "Indsigt", icon: Lightbulb },
-  { href: "/settings", label: "Indstillinger", icon: Settings },
+  { href: "/", labelKey: "today", icon: House },
+  { href: "/usage", labelKey: "usage", icon: ChartColumn },
+  { href: "/insights", labelKey: "insights", icon: Lightbulb },
+  { href: "/settings", labelKey: "settings", icon: Settings },
 ];
 
 // "/" must match exactly, otherwise it would be active on every page.
@@ -33,14 +34,15 @@ function isActive(pathname: string, href: string): boolean {
 
 export function BottomNav() {
   const pathname = usePathname();
+  const t = useTranslations("nav");
 
   return (
     <nav
-      aria-label="Hovedmenu"
+      aria-label={t("label")}
       className="fixed inset-x-0 bottom-0 z-50 border-t bg-background/80 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg md:hidden"
     >
       <ul className="mx-auto grid max-w-md grid-cols-4">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {NAV_ITEMS.map(({ href, labelKey, icon: Icon }) => {
           const active = isActive(pathname, href);
           return (
             <li key={href}>
@@ -53,7 +55,7 @@ export function BottomNav() {
                 )}
               >
                 <Icon aria-hidden className="size-6" />
-                <span>{label}</span>
+                <span>{t(labelKey)}</span>
               </Link>
             </li>
           );
