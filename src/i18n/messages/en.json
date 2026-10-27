@@ -1,0 +1,9 @@
+{
+  "nav": {
+    "label": "Main menu",
+    "today": "Today",
+    "usage": "Usage",
+    "insights": "Insights",
+    "settings": "Settings"
+  }
+}

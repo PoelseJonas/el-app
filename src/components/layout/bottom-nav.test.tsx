@@ -1,5 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { renderWithIntl } from "@/test/render-with-intl";
 import { BottomNav } from "./bottom-nav";
 
 // usePathname needs Next.js' router, which does not exist in tests, so we fake it.
@@ -18,20 +19,31 @@ function activeLinks() {
 
 describe("BottomNav", () => {
   it("renders one link per section", () => {
-    render(<BottomNav />);
+    renderWithIntl(<BottomNav />);
     expect(screen.getAllByRole("link")).toHaveLength(4);
   });
 
   it("marks only the home link as current on /", () => {
-    render(<BottomNav />);
+    renderWithIntl(<BottomNav />);
     expect(activeLinks()).toHaveLength(1);
     expect(activeLinks()[0]).toHaveAttribute("href", "/");
   });
 
   it("marks the section as current on a nested route", () => {
     pathname.current = "/usage/week";
-    render(<BottomNav />);
+    renderWithIntl(<BottomNav />);
     expect(activeLinks()).toHaveLength(1);
     expect(activeLinks()[0]).toHaveAttribute("href", "/usage");
+  });
+
+  it("shows labels in the chosen language", () => {
+    renderWithIntl(<BottomNav />, "en");
+    expect(
+      screen.getByRole("navigation", { name: "Main menu" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Usage" })).toHaveAttribute(
+      "href",
+      "/usage",
+    );
   });
 });
