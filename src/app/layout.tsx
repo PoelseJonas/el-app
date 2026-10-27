@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
 import { AppShell } from "@/components/layout/app-shell";
 import "./globals.css";
 
@@ -18,11 +20,23 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+// The language comes from a cookie or the Accept-Language header (src/i18n/request.ts), so
+// every page depends on the request and cannot be prerendered. With cacheComponents on,
+// Next.js requires opting into that explicitly ("blocking route"). The alternative is the
+// language in the URL (/da/..., /en/...), see docs/architecture.md.
+export const instant = false;
+
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // The language picked in src/i18n/request.ts, so screen readers and the browser know it.
+  const locale = await getLocale();
+
   return (
-    <html lang="da" className={`${inter.variable} h-full antialiased`}>
+    <html lang={locale} className={`${inter.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
-        <AppShell>{children}</AppShell>
+        {/* Makes the messages available to client components (useTranslations). */}
+        <NextIntlClientProvider>
+          <AppShell>{children}</AppShell>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
