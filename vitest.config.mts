@@ -10,6 +10,11 @@ export default defineConfig({
     alias: {
       "@tests": fileURLToPath(new URL("./tests", import.meta.url)),
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      // "server-only" throws outside Next.js' server build. Tests run server code directly,
+      // so they get the package's own empty stand-in instead.
+      "server-only": fileURLToPath(
+        new URL("./node_modules/server-only/empty.js", import.meta.url),
+      ),
     },
   },
   test: {
