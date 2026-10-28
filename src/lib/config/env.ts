@@ -2,6 +2,10 @@
 // fails with a clear message at startup instead of deep inside an API call.
 // Server only: ELOVERBLIK_REFRESH_TOKEN must never reach the browser.
 
+// Makes the build fail if this file is ever imported from a Client Component.
+// Next.js would not send the token anyway (no NEXT_PUBLIC_ prefix), but this turns a
+// confusing runtime error into a clear build error.
+import "server-only";
 import { z } from "zod";
 
 const envSchema = z.object({

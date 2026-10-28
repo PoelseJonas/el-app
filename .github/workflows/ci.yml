@@ -8,6 +8,11 @@ on:
   push:
     branches: [staging, main]
 
+# CI only needs to read the code. Stated here so it stays read-only even if the
+# repository's default token permissions are changed.
+permissions:
+  contents: read
+
 # A newer run on the same PR or branch cancels the older one.
 concurrency:
   group: ci-${{ github.ref }}
