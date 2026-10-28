@@ -5,5 +5,25 @@
     "usage": "Forbrug",
     "insights": "Indsigt",
     "settings": "Indstillinger"
+  },
+  "today": {
+    "title": "I dag",
+    "placeholder": "Her kommer elpris og CO2-udledning time for time."
+  },
+  "usage": {
+    "title": "Forbrug",
+    "placeholder": "Her kommer dit forbrug pr. time for de sidste 7 dage."
+  },
+  "insights": {
+    "title": "Indsigt",
+    "placeholder": "Her kommer dine dyreste og mest beskidte timer."
+  },
+  "settings": {
+    "title": "Indstillinger",
+    "language": {
+      "label": "Sprog",
+      "da": "Dansk",
+      "en": "English"
+    }
   }
 }
