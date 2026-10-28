@@ -1,26 +1,202 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "./theme.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Dark mode: `.dark` on <html> (chosen in settings), or the OS is dark and the user has not
+ * chosen `.light`. The class comes from the THEME cookie in src/app/layout.tsx. "System"
+ * sets no class, so the media query decides.
+ */
+@custom-variant dark {
+  &:where(.dark, .dark *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:not(.light, .light *)) {
+      @slot;
+    }
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-highlight: var(--highlight);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-price-low: var(--price-low);
+  --color-price-mid: var(--price-mid);
+  --color-price-high: var(--price-high);
+  --color-price-low-text: var(--price-low-text);
+  --color-price-mid-text: var(--price-mid-text);
+  --color-price-high-text: var(--price-high-text);
+  --color-price-low-subtle: var(--price-low-subtle);
+  --color-price-mid-subtle: var(--price-mid-subtle);
+  --color-price-high-subtle: var(--price-high-subtle);
+  --color-co2-low: var(--co2-low);
+  --color-co2-mid: var(--co2-mid);
+  --color-co2-high: var(--co2-high);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/*
+ * Colour values come from the design system in docs/design-system/tokens.json (usage notes,
+ * contrast checks). Change them there and here together. Every text colour holds at least
+ * 4.5:1 on background and card in both themes.
+ */
+:root {
+  /* Native controls and scrollbars follow the theme too. */
+  color-scheme: light;
+  /* Warm grey page behind white cards, like iOS' grouped background. */
+  --background: #f5f3ef;
+  --foreground: #1d1b18;
+  --card: #ffffff;
+  --card-foreground: #1d1b18;
+  --popover: #ffffff;
+  --popover-foreground: #1d1b18;
+  /* The app's one accent (calm blue): primary button, active tab, links, "now" marker. */
+  --primary: #1d5fa8;
+  --primary-foreground: #ffffff;
+  --primary-subtle: #e2ecf7;
+  --secondary: #ebe8e2;
+  --secondary-foreground: #1d1b18;
+  --muted: #ebe8e2;
+  --muted-foreground: #635d54;
+  --accent: #ebe8e2;
+  --accent-foreground: #1d1b18;
+  --destructive: var(--price-high-text);
+  --border: #dedad2;
+  --input: #8f887d;
+  --ring: #1d5fa8;
+  /*
+   * Price and CO2 levels share one scale, so users learn one colour code. Never the only
+   * signal: always pair with a word or icon. -text is for text on card/background or on the
+   * matching -subtle fill.
+   */
+  --price-low: #2f9a62;
+  --price-mid: #b87d10;
+  --price-high: #c4452a;
+  --price-low-text: #1c6a41;
+  --price-mid-text: #7f540a;
+  --price-high-text: #a6361d;
+  --price-low-subtle: #e2f2e8;
+  --price-mid-subtle: #f8ecd2;
+  --price-high-subtle: #f9e1d9;
+  --co2-low: var(--price-low);
+  --co2-mid: var(--price-mid);
+  --co2-high: var(--price-high);
+  /* Chart series: plain bars are neutral; the levels follow the price scale. */
+  --chart-1: var(--price-low);
+  --chart-2: var(--muted-foreground);
+  --chart-3: var(--price-mid);
+  --chart-4: var(--price-high);
+  --chart-5: var(--primary);
+  /* Marks the best (cheapest/greenest) hours in charts: the "low" level colour. */
+  --highlight: var(--price-low);
+  --radius: 0.625rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1d1b18;
+  --sidebar-primary: #1d5fa8;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ebe8e2;
+  --sidebar-accent-foreground: #1d1b18;
+  --sidebar-border: #dedad2;
+  --sidebar-ring: #1d5fa8;
+}
+
+/*
+ * Dark tokens through the dark variant above, so they apply both for `.dark` and for a dark
+ * OS in "system" mode without repeating the values.
+ */
+:root {
+  @variant dark {
+    /* Only plain values change here; aliases (destructive, co2-*, chart-*, highlight) follow. */
+    color-scheme: dark;
+    --background: #121110;
+    --foreground: #f3f0ea;
+    --card: #1d1c1a;
+    --card-foreground: #f3f0ea;
+    --popover: #1d1c1a;
+    --popover-foreground: #f3f0ea;
+    /* A lighter accent needs dark text on it. */
+    --primary: #6aa8ec;
+    --primary-foreground: #0b1a2b;
+    --primary-subtle: #1a2a3d;
+    --secondary: #2b2926;
+    --secondary-foreground: #f3f0ea;
+    --muted: #2b2926;
+    --muted-foreground: #a8a196;
+    --accent: #2b2926;
+    --accent-foreground: #f3f0ea;
+    --border: #34322e;
+    --input: #7a746b;
+    --ring: #6aa8ec;
+    --price-low: #4cc184;
+    --price-mid: #e2a73c;
+    --price-high: #ec7356;
+    --price-low-text: #7ad6a4;
+    --price-mid-text: #f0c26c;
+    --price-high-text: #f59c85;
+    --price-low-subtle: #18301f;
+    --price-mid-subtle: #36290f;
+    --price-high-subtle: #3b1f17;
+    --sidebar: #1d1c1a;
+    --sidebar-foreground: #f3f0ea;
+    --sidebar-primary: #6aa8ec;
+    --sidebar-primary-foreground: #0b1a2b;
+    --sidebar-accent: #2b2926;
+    --sidebar-accent-foreground: #f3f0ea;
+    --sidebar-border: #34322e;
+    --sidebar-ring: #6aa8ec;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }

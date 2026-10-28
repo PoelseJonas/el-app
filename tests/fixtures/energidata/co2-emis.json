@@ -1,0 +1,80 @@
+{
+  "total": 12,
+  "filters": "{\"PriceArea\":[\"DK1\"]}",
+  "sort": "Minutes5UTC asc",
+  "dataset": "CO2Emis",
+  "records": [
+    {
+      "Minutes5UTC": "2026-10-28T11:00:00",
+      "Minutes5DK": "2026-10-28T12:00:00",
+      "PriceArea": "DK1",
+      "CO2Emission": 52
+    },
+    {
+      "Minutes5UTC": "2026-10-28T11:05:00",
+      "Minutes5DK": "2026-10-28T12:05:00",
+      "PriceArea": "DK1",
+      "CO2Emission": 52
+    },
+    {
+      "Minutes5UTC": "2026-10-28T11:10:00",
+      "Minutes5DK": "2026-10-28T12:10:00",
+      "PriceArea": "DK1",
+      "CO2Emission": 52
+    },
+    {
+      "Minutes5UTC": "2026-10-28T11:15:00",
+      "Minutes5DK": "2026-10-28T12:15:00",
+      "PriceArea": "DK1",
+      "CO2Emission": 53
+    },
+    {
+      "Minutes5UTC": "2026-10-28T11:20:00",
+      "Minutes5DK": "2026-10-28T12:20:00",
+      "PriceArea": "DK1",
+      "CO2Emission": 54
+    },
+    {
+      "Minutes5UTC": "2026-10-28T11:25:00",
+      "Minutes5DK": "2026-10-28T12:25:00",
+      "PriceArea": "DK1",
+      "CO2Emission": 53
+    },
+    {
+      "Minutes5UTC": "2026-10-28T11:30:00",
+      "Minutes5DK": "2026-10-28T12:30:00",
+      "PriceArea": "DK1",
+      "CO2Emission": 52
+    },
+    {
+      "Minutes5UTC": "2026-10-28T11:35:00",
+      "Minutes5DK": "2026-10-28T12:35:00",
+      "PriceArea": "DK1",
+      "CO2Emission": 51
+    },
+    {
+      "Minutes5UTC": "2026-10-28T11:40:00",
+      "Minutes5DK": "2026-10-28T12:40:00",
+      "PriceArea": "DK1",
+      "CO2Emission": 52
+    },
+    {
+      "Minutes5UTC": "2026-10-28T11:45:00",
+      "Minutes5DK": "2026-10-28T12:45:00",
+      "PriceArea": "DK1",
+      "CO2Emission": 52
+    },
+    {
+      "Minutes5UTC": "2026-10-28T11:50:00",
+      "Minutes5DK": "2026-10-28T12:50:00",
+      "PriceArea": "DK1",
+      "CO2Emission": 51
+    },
+    {
+      "Minutes5UTC": "2026-10-28T11:55:00",
+      "Minutes5DK": "2026-10-28T12:55:00",
+      "PriceArea": "DK1",
+      "CO2Emission": 51
+    }
+  ]
+}
