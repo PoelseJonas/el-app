@@ -1,6 +1,7 @@
 {
   "nav": {
     "label": "Hovedmenu",
+    "appName": "El-app",
     "today": "I dag",
     "usage": "Forbrug",
     "insights": "Indsigt",
@@ -24,6 +25,12 @@
       "label": "Sprog",
       "da": "Dansk",
       "en": "English"
+    },
+    "theme": {
+      "label": "Udseende",
+      "system": "System",
+      "light": "Lys",
+      "dark": "Mørk"
     }
   }
 }
