@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import da from "./messages/da.json";
-import en from "./messages/en.json";
+import da from "@/i18n/messages/da.json";
+import en from "@/i18n/messages/en.json";
 
 /** All keys as dotted paths, e.g. "nav.usage". */
 function keysOf(messages: object, prefix = ""): string[] {

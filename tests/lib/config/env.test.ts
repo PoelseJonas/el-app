@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseEnv } from "./env";
+import { parseEnv } from "@/lib/config/env";
 
 describe("parseEnv", () => {
   it("defaults to DK1 and no token", () => {
