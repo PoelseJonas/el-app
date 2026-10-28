@@ -1,6 +1,7 @@
 {
   "nav": {
     "label": "Main menu",
+    "appName": "El-app",
     "today": "Today",
     "usage": "Usage",
     "insights": "Insights",
@@ -24,6 +25,12 @@
       "label": "Language",
       "da": "Dansk",
       "en": "English"
+    },
+    "theme": {
+      "label": "Appearance",
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
     }
   }
 }

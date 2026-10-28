@@ -1,37 +1,11 @@
 "use client";
 import { cn } from "cn";
-import {
-  ChartColumn,
-  House,
-  Lightbulb,
-  Settings,
-  type LucideIcon,
-} from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NAV_ITEMS, isActive } from "./nav-items";
 
-interface NavItem {
-  href: string;
-  /** Key under "nav" in src/i18n/messages/*.json. */
-  labelKey: "today" | "usage" | "insights" | "settings";
-  icon: LucideIcon;
-}
-
-const NAV_ITEMS: readonly NavItem[] = [
-  { href: "/", labelKey: "today", icon: House },
-  { href: "/usage", labelKey: "usage", icon: ChartColumn },
-  { href: "/insights", labelKey: "insights", icon: Lightbulb },
-  { href: "/settings", labelKey: "settings", icon: Settings },
-];
-
-// "/" must match exactly, otherwise it would be active on every page.
-function isActive(pathname: string, href: string): boolean {
-  return href === "/"
-    ? pathname === "/"
-    : pathname === href || pathname.startsWith(`${href}/`);
-}
-
+/** Tab bar at the bottom on mobile, like iOS. Hidden from `md`, where TopNav takes over. */
 export function BottomNav() {
   const pathname = usePathname();
   const t = useTranslations("nav");
