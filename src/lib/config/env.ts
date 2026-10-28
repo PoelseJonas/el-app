@@ -10,6 +10,9 @@ import { z } from "zod";
 
 const envSchema = z.object({
   PRICE_AREA: z.enum(["DK1", "DK2"]).default("DK1"),
+  // Only changed by the Playwright tests, which point it at a local server with saved
+  // responses (tests/e2e/fixture-server.mts), so they never call the real API.
+  ENERGIDATA_BASE_URL: z.url().default("https://api.energidataservice.dk"),
   // An empty value in .env.local means "no token": the app falls back to demo data.
   ELOVERBLIK_REFRESH_TOKEN: z
     .string()

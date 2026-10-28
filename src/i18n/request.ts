@@ -4,6 +4,7 @@
 
 import { cookies, headers } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
+import { DANISH_TIME_ZONE } from "@/lib/utils/time";
 import { defaultLocale, isLocale, localeCookieName } from "./config";
 
 export default getRequestConfig(async () => {
@@ -19,6 +20,9 @@ export default getRequestConfig(async () => {
 
   return {
     locale,
+    // Times are always shown in Danish time, also in English and on a server running in UTC.
+    // Prices and CO2 belong to Danish price areas, so local time is what matters.
+    timeZone: DANISH_TIME_ZONE,
     messages: (await import(`./messages/${locale}.json`)).default,
   };
 });
