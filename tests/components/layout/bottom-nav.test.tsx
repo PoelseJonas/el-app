@@ -1,7 +1,7 @@
 import { screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { renderWithIntl } from "@/test/render-with-intl";
-import { BottomNav } from "./bottom-nav";
+import { renderWithIntl } from "@tests/helpers/render-with-intl";
+import { BottomNav } from "@/components/layout/bottom-nav";
 
 // usePathname needs Next.js' router, which does not exist in tests, so we fake it.
 const pathname = vi.hoisted(() => ({ current: "/" }));
