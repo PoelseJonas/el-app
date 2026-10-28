@@ -13,7 +13,7 @@ export function BestHoursList({ title, emptyText, items }: BestHoursListProps) {
       {items.length === 0 ? (
         <p className="text-subheadline text-muted-foreground">{emptyText}</p>
       ) : (
-        <ul className="divide-y overflow-hidden rounded-2xl bg-muted/60">
+        <ul className="divide-y overflow-hidden rounded-2xl bg-card">
           {items.map((item) => (
             <li
               key={item.key}

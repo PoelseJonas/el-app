@@ -34,7 +34,7 @@ export async function NowSummary({ hour }: { hour: HourOverview }) {
       </h2>
       <dl className="grid grid-cols-2 gap-3">
         {stats.map((stat) => (
-          <div key={stat.label} className="rounded-2xl bg-muted/60 p-4">
+          <div key={stat.label} className="rounded-2xl bg-card p-4">
             <dt className="text-subheadline text-muted-foreground">
               {stat.label}
             </dt>
