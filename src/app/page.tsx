@@ -1,14 +1,13 @@
+import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/layout/page-header";
 
 // Placeholder until the "I dag" overview is built in phase 1.
-// TODO: move texts to the dictionary when next-intl is set up.
-export default function TodayPage() {
+export default async function TodayPage() {
+  const t = await getTranslations("today");
   return (
     <>
-      <PageHeader title="I dag" />
-      <p className="text-body text-muted-foreground">
-        Her kommer elpris og CO2-udledning time for time.
-      </p>
+      <PageHeader title={t("title")} />
+      <p className="text-body text-muted-foreground">{t("placeholder")}</p>
     </>
   );
 }
