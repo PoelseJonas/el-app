@@ -9,7 +9,19 @@
   },
   "today": {
     "title": "Today",
-    "placeholder": "Electricity prices and CO2 emissions hour by hour are coming here."
+    "now": "Right now",
+    "spotPrice": "Spot price",
+    "co2": "CO2",
+    "spotPriceNote": "Spot price without grid tariff, taxes and VAT.",
+    "priceChart": "Spot price per hour today",
+    "co2Chart": "CO2 per hour today",
+    "co2ForecastNote": "Faded bars are a forecast.",
+    "hourHeading": "Hour",
+    "hourRange": "{from}-{to}",
+    "cheapestHours": "Cheapest hours",
+    "greenestHours": "Greenest hours",
+    "noHoursLeft": "There are no more hours today.",
+    "noData": "There are no prices for today yet. Try again later."
   },
   "usage": {
     "title": "Usage",
@@ -32,5 +44,13 @@
       "light": "Light",
       "dark": "Dark"
     }
+  },
+  "units": {
+    "dkkPerKwh": "{value} DKK/kWh",
+    "gramCo2PerKwh": "{value} g CO2/kWh"
+  },
+  "errors": {
+    "sourceUnavailable": "Prices and CO2 could not be loaded right now.",
+    "retry": "Try again"
   }
 }

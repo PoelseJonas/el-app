@@ -9,7 +9,19 @@
   },
   "today": {
     "title": "I dag",
-    "placeholder": "Her kommer elpris og CO2-udledning time for time."
+    "now": "Lige nu",
+    "spotPrice": "Spotpris",
+    "co2": "CO2",
+    "spotPriceNote": "Spotpris uden nettarif, afgifter og moms.",
+    "priceChart": "Spotpris pr. time i dag",
+    "co2Chart": "CO2 pr. time i dag",
+    "co2ForecastNote": "Svagere søjler er en prognose.",
+    "hourHeading": "Time",
+    "hourRange": "kl. {from}-{to}",
+    "cheapestHours": "De billigste timer",
+    "greenestHours": "De grønneste timer",
+    "noHoursLeft": "Der er ikke flere timer i dag.",
+    "noData": "Der er ingen priser for i dag endnu. Prøv igen senere."
   },
   "usage": {
     "title": "Forbrug",
@@ -32,5 +44,13 @@
       "light": "Lys",
       "dark": "Mørk"
     }
+  },
+  "units": {
+    "dkkPerKwh": "{value} kr./kWh",
+    "gramCo2PerKwh": "{value} g CO2/kWh"
+  },
+  "errors": {
+    "sourceUnavailable": "Priser og CO2 kunne ikke hentes lige nu.",
+    "retry": "Prøv igen"
   }
 }
