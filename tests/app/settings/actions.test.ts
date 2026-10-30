@@ -17,7 +17,13 @@ function form(name: string, value: string): FormData {
 
 describe("setLocale", () => {
   it("saves a supported language in the NEXT_LOCALE cookie", async () => {
-    await setLocale(form("locale", "en"));
+    // Arrange
+    const english = form("locale", "en");
+
+    // Act
+    await setLocale(english);
+
+    // Assert
     expect(cookieStore.set).toHaveBeenCalledWith(
       "NEXT_LOCALE",
       "en",
@@ -26,14 +32,26 @@ describe("setLocale", () => {
   });
 
   it("ignores a language the app does not support", async () => {
-    await setLocale(form("locale", "de"));
+    // Arrange
+    const german = form("locale", "de");
+
+    // Act
+    await setLocale(german);
+
+    // Assert
     expect(cookieStore.set).not.toHaveBeenCalled();
   });
 });
 
 describe("setTheme", () => {
   it("saves a known theme in the THEME cookie", async () => {
-    await setTheme(form("theme", "dark"));
+    // Arrange
+    const dark = form("theme", "dark");
+
+    // Act
+    await setTheme(dark);
+
+    // Assert
     expect(cookieStore.set).toHaveBeenCalledWith(
       "THEME",
       "dark",
@@ -42,7 +60,13 @@ describe("setTheme", () => {
   });
 
   it("ignores an unknown theme", async () => {
-    await setTheme(form("theme", "blue"));
+    // Arrange
+    const blue = form("theme", "blue");
+
+    // Act
+    await setTheme(blue);
+
+    // Assert
     expect(cookieStore.set).not.toHaveBeenCalled();
   });
 });

@@ -2,13 +2,11 @@
 // nothing in the app knows the API's field names.
 
 import type { Co2Point, PricePoint } from "@/lib/domain/types";
+import { compareByStart } from "@/lib/utils/time";
 import { dkkPerMwhToDkkPerKwh } from "@/lib/utils/units";
 import type { Co2EmissionsResponse, DayAheadPricesResponse } from "./schemas";
 
-/** The API's UTC fields have no "Z", so `new Date()` would read them as local time. */
-function parseUtc(timestamp: string): Date {
-  return new Date(`${timestamp}Z`);
-}
+// #region Public API
 
 /** Spot prices in DKK/kWh. DayAheadPrices has 15-minute intervals (dataset metadata: "PT15M"). */
 export function mapDayAheadPrices(
@@ -44,11 +42,21 @@ export function mergeMeasuredAndForecast(
   measured: Co2Point[],
   forecast: Co2Point[],
 ): Co2Point[] {
-  const measuredStarts = new Set(
-    measured.map((point) => point.start.getTime()),
+  const measuredTimes = new Set(measured.map((point) => point.start.getTime()));
+  const notYetMeasured = forecast.filter(
+    (point) => !measuredTimes.has(point.start.getTime()),
   );
-  return [
-    ...measured,
-    ...forecast.filter((point) => !measuredStarts.has(point.start.getTime())),
-  ].sort((a, b) => a.start.getTime() - b.start.getTime());
+
+  return [...measured, ...notYetMeasured].sort(compareByStart);
 }
+
+// #endregion
+
+// #region Helpers
+
+/** The API's UTC fields have no "Z", so `new Date()` would read them as local time. */
+function parseUtc(timestamp: string): Date {
+  return new Date(`${timestamp}Z`);
+}
+
+// #endregion

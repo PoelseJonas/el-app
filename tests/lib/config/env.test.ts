@@ -3,26 +3,50 @@ import { parseEnv } from "@/lib/config/env";
 
 describe("parseEnv", () => {
   it("defaults to DK1, the real Energi Data Service and no token", () => {
-    expect(parseEnv({})).toEqual({
+    // Arrange
+    const noVariables = {};
+
+    // Act
+    const env = parseEnv(noVariables);
+
+    // Assert
+    expect(env).toEqual({
       PRICE_AREA: "DK1",
       ENERGIDATA_BASE_URL: "https://api.energidataservice.dk",
       ELOVERBLIK_REFRESH_TOKEN: undefined,
     });
   });
 
-  it("rejects an Energi Data Service address that is not a URL", () => {
-    expect(() => parseEnv({ ENERGIDATA_BASE_URL: "localhost" })).toThrow(
-      /ENERGIDATA_BASE_URL/,
-    );
-  });
-
   it("treats an empty token as missing", () => {
-    expect(
-      parseEnv({ ELOVERBLIK_REFRESH_TOKEN: "" }).ELOVERBLIK_REFRESH_TOKEN,
-    ).toBeUndefined();
+    // Arrange
+    const emptyToken = { ELOVERBLIK_REFRESH_TOKEN: "" };
+
+    // Act
+    const env = parseEnv(emptyToken);
+
+    // Assert
+    expect(env.ELOVERBLIK_REFRESH_TOKEN).toBeUndefined();
   });
 
   it("rejects an unknown price area", () => {
-    expect(() => parseEnv({ PRICE_AREA: "DK3" })).toThrow(/PRICE_AREA/);
+    // Arrange
+    const unknownArea = { PRICE_AREA: "DK3" };
+
+    // Act
+    const parse = () => parseEnv(unknownArea);
+
+    // Assert
+    expect(parse).toThrow(/PRICE_AREA/);
+  });
+
+  it("rejects an Energi Data Service address that is not a URL", () => {
+    // Arrange
+    const notAUrl = { ENERGIDATA_BASE_URL: "localhost" };
+
+    // Act
+    const parse = () => parseEnv(notAUrl);
+
+    // Assert
+    expect(parse).toThrow(/ENERGIDATA_BASE_URL/);
   });
 });

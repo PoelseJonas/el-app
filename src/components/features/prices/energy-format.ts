@@ -4,6 +4,9 @@
 import { getFormatter, getTranslations } from "next-intl/server";
 import { addHour } from "@/lib/utils/time";
 
+/** The formatters returned by getEnergyFormat(), for helpers that receive them as an argument. */
+export type EnergyFormat = Awaited<ReturnType<typeof getEnergyFormat>>;
+
 export async function getEnergyFormat() {
   const format = await getFormatter();
   const tUnits = await getTranslations("units");
