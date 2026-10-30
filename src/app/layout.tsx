@@ -2,15 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
-import { cookies } from "next/headers";
 import { cn } from "cn";
 import { AppShell } from "@/components/layout/app-shell";
-import {
-  defaultTheme,
-  isTheme,
-  themeClassName,
-  themeCookieName,
-} from "@/components/layout/theme";
+import { getSavedTheme } from "@/components/layout/get-saved-theme";
+import { themeClassName } from "@/components/layout/theme";
 import "./globals.css";
 
 // Inter comes with the shadcn "luma" style. It is exposed as --font-sans, which
@@ -39,18 +34,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
   // Read on the server so the first paint has the right theme. Costs nothing extra: the page
   // is already dynamic because of the language cookie (see `instant` above).
-  const savedTheme = (await cookies()).get(themeCookieName)?.value;
-  const theme = isTheme(savedTheme) ? savedTheme : defaultTheme;
+  const theme = await getSavedTheme();
+  const htmlClassName = cn(
+    inter.variable,
+    "h-full antialiased",
+    themeClassName(theme),
+  );
 
   return (
-    <html
-      lang={locale}
-      className={cn(
-        inter.variable,
-        "h-full antialiased",
-        themeClassName(theme),
-      )}
-    >
+    <html lang={locale} className={htmlClassName}>
       <body className="flex min-h-full flex-col">
         {/* Makes the messages available to client components (useTranslations). */}
         <NextIntlClientProvider>
