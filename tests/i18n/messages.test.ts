@@ -14,6 +14,13 @@ function keysOf(messages: object, prefix = ""): string[] {
 describe("messages", () => {
   // da.json is the source of truth; a missing English text would otherwise only show up at runtime.
   it("has the same keys in every language", () => {
-    expect(keysOf(en).sort()).toEqual(keysOf(da).sort());
+    // Arrange
+    const danishKeys = keysOf(da).sort();
+
+    // Act
+    const englishKeys = keysOf(en).sort();
+
+    // Assert
+    expect(englishKeys).toEqual(danishKeys);
   });
 });

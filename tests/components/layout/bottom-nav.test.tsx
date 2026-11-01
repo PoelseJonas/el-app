@@ -11,7 +11,7 @@ afterEach(() => {
   pathname.current = "/";
 });
 
-function activeLinks() {
+function currentLinks() {
   return screen
     .getAllByRole("link")
     .filter((link) => link.getAttribute("aria-current") === "page");
@@ -19,25 +19,48 @@ function activeLinks() {
 
 describe("BottomNav", () => {
   it("renders one link per section", () => {
+    // Arrange
+    pathname.current = "/";
+
+    // Act
     renderWithIntl(<BottomNav />);
+
+    // Assert
     expect(screen.getAllByRole("link")).toHaveLength(4);
   });
 
   it("marks only the home link as current on /", () => {
+    // Arrange
+    pathname.current = "/";
+
+    // Act
     renderWithIntl(<BottomNav />);
-    expect(activeLinks()).toHaveLength(1);
-    expect(activeLinks()[0]).toHaveAttribute("href", "/");
+
+    // Assert
+    expect(currentLinks()).toHaveLength(1);
+    expect(currentLinks()[0]).toHaveAttribute("href", "/");
   });
 
   it("marks the section as current on a nested route", () => {
+    // Arrange
     pathname.current = "/usage/week";
+
+    // Act
     renderWithIntl(<BottomNav />);
-    expect(activeLinks()).toHaveLength(1);
-    expect(activeLinks()[0]).toHaveAttribute("href", "/usage");
+
+    // Assert
+    expect(currentLinks()).toHaveLength(1);
+    expect(currentLinks()[0]).toHaveAttribute("href", "/usage");
   });
 
   it("shows labels in the chosen language", () => {
-    renderWithIntl(<BottomNav />, "en");
+    // Arrange
+    const language = "en";
+
+    // Act
+    renderWithIntl(<BottomNav />, language);
+
+    // Assert
     expect(
       screen.getByRole("navigation", { name: "Main menu" }),
     ).toBeInTheDocument();

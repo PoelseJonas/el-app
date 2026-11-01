@@ -3,7 +3,7 @@ import { cn } from "cn";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_ITEMS, isActive } from "./nav-items";
+import { NAV_ITEMS, isActive, type NavItem } from "./nav-items";
 
 /**
  * Menu at the top on desktop (from `md`), where users expect it (Jakob's law). Same items as
@@ -23,26 +23,33 @@ export function TopNav() {
           {t("appName")}
         </Link>
         <ul className="flex flex-1 justify-end gap-1">
-          {NAV_ITEMS.map(({ href, labelKey, icon: Icon }) => {
-            const active = isActive(pathname, href);
-            return (
-              <li key={href}>
-                <Link
-                  href={href}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "flex min-h-11 items-center gap-2 rounded-lg px-3 text-subheadline text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                    active && "font-medium text-foreground",
-                  )}
-                >
-                  <Icon aria-hidden className="size-4" />
-                  <span>{t(labelKey)}</span>
-                </Link>
-              </li>
-            );
-          })}
+          {NAV_ITEMS.map((item) => (
+            <li key={item.href}>
+              <TopNavLink item={item} active={isActive(pathname, item.href)} />
+            </li>
+          ))}
         </ul>
       </nav>
     </header>
+  );
+}
+
+/** One menu item: small icon and label side by side. */
+function TopNavLink({ item, active }: { item: NavItem; active: boolean }) {
+  const t = useTranslations("nav");
+  const Icon = item.icon;
+
+  return (
+    <Link
+      href={item.href}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "flex min-h-11 items-center gap-2 rounded-lg px-3 text-subheadline text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+        active && "font-medium text-foreground",
+      )}
+    >
+      <Icon aria-hidden className="size-4" />
+      <span>{t(item.labelKey)}</span>
+    </Link>
   );
 }

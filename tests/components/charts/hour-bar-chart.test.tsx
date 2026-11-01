@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { renderWithIntl } from "@tests/helpers/render-with-intl";
 import { HourBarChart, type HourBar } from "@/components/charts/hour-bar-chart";
 
-const bars: HourBar[] = [
+const twoHours: HourBar[] = [
   {
     key: "2026-10-28T16:00:00.000Z",
     label: "17",
@@ -21,24 +21,43 @@ const bars: HourBar[] = [
   },
 ];
 
+function renderPriceChart(bars: HourBar[]) {
+  renderWithIntl(
+    <HourBarChart
+      bars={bars}
+      title="Spotpris pr. time i dag"
+      hourHeading="Time"
+      valueHeading="Spotpris"
+    />,
+  );
+}
+
+// The SVG chart is hidden from screen readers; the table carries the same data.
 describe("HourBarChart", () => {
-  // The SVG chart is hidden from screen readers; the table carries the same data.
-  it("has a table version of the data for screen readers", () => {
-    renderWithIntl(
-      <HourBarChart
-        bars={bars}
-        title="Spotpris pr. time i dag"
-        hourHeading="Time"
-        valueHeading="Spotpris"
-      />,
-    );
+  it("has a table version with one row per hour", () => {
+    // Arrange
+    const bars = twoHours;
+
+    // Act
+    renderPriceChart(bars);
+
+    // Assert
     const table = screen.getByRole("table", {
       name: "Spotpris pr. time i dag",
     });
-    const rows = within(table).getAllByRole("row");
     // Header row + one row per hour.
-    expect(rows).toHaveLength(3);
-    expect(within(rows[2]).getByText("kl. 18-19")).toBeInTheDocument();
-    expect(within(rows[2]).getByText("0,90 kr./kWh")).toBeInTheDocument();
+    expect(within(table).getAllByRole("row")).toHaveLength(3);
+  });
+
+  it("shows each hour with its value in the table", () => {
+    // Arrange
+    const bars = twoHours;
+
+    // Act
+    renderPriceChart(bars);
+
+    // Assert
+    const row = screen.getByRole("row", { name: /kl. 18-19/ });
+    expect(within(row).getByText("0,90 kr./kWh")).toBeInTheDocument();
   });
 });
