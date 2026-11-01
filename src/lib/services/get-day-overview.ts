@@ -5,8 +5,15 @@
 import { lowestHours } from "@/lib/calc/best-hours";
 import { averageCo2ByHour, averagePricesByHour } from "@/lib/calc/hourly";
 import type { Co2Source, PriceSource } from "@/lib/domain/sources";
-import type { DateRange, PriceArea } from "@/lib/domain/types";
+import type {
+  Co2Point,
+  DateRange,
+  PriceArea,
+  PricePoint,
+} from "@/lib/domain/types";
 import { startOfHour } from "@/lib/utils/time";
+
+// #region Types
 
 /** One hour of the day. A value is missing if the source had none for that hour. */
 export interface HourOverview {
@@ -28,57 +35,119 @@ export interface DayOverview {
   greenestHours: HourOverview[];
 }
 
+export interface DaySources {
+  priceSource: PriceSource;
+  co2Source: Co2Source;
+}
+
+// #endregion
+
+// #region Public API
+
 /** How many best hours to show. Few on purpose (Hick's law, docs/design.md). */
 const BEST_HOURS_COUNT = 3;
 
 export async function getDayOverview(
-  sources: { priceSource: PriceSource; co2Source: Co2Source },
+  sources: DaySources,
   area: PriceArea,
   day: DateRange,
   now: Date,
 ): Promise<DayOverview> {
-  const [prices, co2] = await Promise.all([
-    sources.priceSource.getPrices(day, area),
-    sources.co2Source.getCo2(day, area),
-  ]);
-
-  const hours = new Map<number, HourOverview>();
-  const hourAt = (start: Date) => {
-    const key = start.getTime();
-    const hour = hours.get(key) ?? { start, co2IsForecast: false };
-    hours.set(key, hour);
-    return hour;
-  };
-  for (const price of averagePricesByHour(prices)) {
-    hourAt(price.start).priceDkkPerKwh = price.priceDkkPerKwh;
-  }
-  for (const value of averageCo2ByHour(co2)) {
-    const hour = hourAt(value.start);
-    hour.co2GramPerKwh = value.co2GramPerKwh;
-    hour.co2IsForecast = value.isForecast;
-  }
-
-  const sorted = [...hours.values()].sort(
-    (a, b) => a.start.getTime() - b.start.getTime(),
+  const { prices, co2 } = await fetchDay(sources, area, day);
+  const hours = combineByHour(
+    averagePricesByHour(prices),
+    averageCo2ByHour(co2),
   );
-  const currentStart = startOfHour(now).getTime();
-  // Past hours cannot be used any more, so only the current and later hours are suggested.
-  const remaining = sorted.filter(
-    (hour) => hour.start.getTime() >= currentStart,
-  );
+  const hoursLeft = hoursFromCurrentHour(hours, now);
 
   return {
-    hours: sorted,
-    currentHour: sorted.find((hour) => hour.start.getTime() === currentStart),
+    hours,
+    currentHour: findHourContaining(hours, now),
     cheapestHours: lowestHours(
-      remaining.filter((hour) => hour.priceDkkPerKwh !== undefined),
-      (hour) => hour.priceDkkPerKwh!,
+      hoursLeft.filter(hasPrice),
+      (hour) => hour.priceDkkPerKwh,
       BEST_HOURS_COUNT,
     ),
     greenestHours: lowestHours(
-      remaining.filter((hour) => hour.co2GramPerKwh !== undefined),
-      (hour) => hour.co2GramPerKwh!,
+      hoursLeft.filter(hasCo2),
+      (hour) => hour.co2GramPerKwh,
       BEST_HOURS_COUNT,
     ),
   };
 }
+
+/** True if the hour has a price. Lets TypeScript know `priceDkkPerKwh` is a number after it. */
+export function hasPrice(
+  hour: HourOverview,
+): hour is HourOverview & { priceDkkPerKwh: number } {
+  return hour.priceDkkPerKwh !== undefined;
+}
+
+/** True if the hour has a CO2 value. Lets TypeScript know `co2GramPerKwh` is a number after it. */
+export function hasCo2(
+  hour: HourOverview,
+): hour is HourOverview & { co2GramPerKwh: number } {
+  return hour.co2GramPerKwh !== undefined;
+}
+
+// #endregion
+
+// #region Helpers
+
+async function fetchDay(sources: DaySources, area: PriceArea, day: DateRange) {
+  const [prices, co2] = await Promise.all([
+    sources.priceSource.getPrices(day, area),
+    sources.co2Source.getCo2(day, area),
+  ]);
+  return { prices, co2 };
+}
+
+/** One HourOverview per hour that has a price, a CO2 value or both, in time order. */
+function combineByHour(
+  hourlyPrices: PricePoint[],
+  hourlyCo2: Co2Point[],
+): HourOverview[] {
+  const hourStarts = uniqueStarts([...hourlyPrices, ...hourlyCo2]);
+
+  return hourStarts.map((start) => {
+    const price = hourlyPrices.find((point) => sameTime(point.start, start));
+    const co2 = hourlyCo2.find((point) => sameTime(point.start, start));
+    return {
+      start,
+      priceDkkPerKwh: price?.priceDkkPerKwh,
+      co2GramPerKwh: co2?.co2GramPerKwh,
+      co2IsForecast: co2?.isForecast ?? false,
+    };
+  });
+}
+
+/** Past hours cannot be used any more, so only the current and later hours are suggested. */
+function hoursFromCurrentHour(
+  hours: HourOverview[],
+  now: Date,
+): HourOverview[] {
+  const currentHourStart = startOfHour(now).getTime();
+  return hours.filter((hour) => hour.start.getTime() >= currentHourStart);
+}
+
+function findHourContaining(
+  hours: HourOverview[],
+  now: Date,
+): HourOverview | undefined {
+  return hours.find((hour) => sameTime(hour.start, startOfHour(now)));
+}
+
+/** The distinct start times, earliest first. */
+function uniqueStarts(points: { start: Date }[]): Date[] {
+  const uniqueTimes = [
+    ...new Set(points.map((point) => point.start.getTime())),
+  ];
+  const earliestFirst = uniqueTimes.sort((a, b) => a - b);
+  return earliestFirst.map((time) => new Date(time));
+}
+
+function sameTime(a: Date, b: Date): boolean {
+  return a.getTime() === b.getTime();
+}
+
+// #endregion

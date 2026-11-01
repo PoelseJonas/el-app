@@ -7,26 +7,58 @@ import co2Fixture from "@tests/fixtures/energidata/co2-emis.json";
 import forecastFixture from "@tests/fixtures/energidata/co2-emis-prog.json";
 import pricesFixture from "@tests/fixtures/energidata/day-ahead-prices.json";
 
-describe("Energi Data Service schemas", () => {
-  it("accept the saved real responses", () => {
-    expect(dayAheadPricesResponseSchema.safeParse(pricesFixture).success).toBe(
-      true,
-    );
-    expect(co2EmissionsResponseSchema.safeParse(co2Fixture).success).toBe(true);
-    expect(co2EmissionsResponseSchema.safeParse(forecastFixture).success).toBe(
-      true,
-    );
+describe("dayAheadPricesResponseSchema", () => {
+  it("accepts the saved real response", () => {
+    // Arrange
+    const response = pricesFixture;
+
+    // Act
+    const result = dayAheadPricesResponseSchema.safeParse(response);
+
+    // Assert
+    expect(result.success).toBe(true);
   });
 
-  it("reject a price that is missing", () => {
-    const broken = {
+  it("rejects a record without a price", () => {
+    // Arrange
+    const missingPrice = {
       records: [{ TimeUTC: "2026-10-28T11:00:00", PriceArea: "DK1" }],
     };
-    expect(dayAheadPricesResponseSchema.safeParse(broken).success).toBe(false);
+
+    // Act
+    const result = dayAheadPricesResponseSchema.safeParse(missingPrice);
+
+    // Assert
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("co2EmissionsResponseSchema", () => {
+  it("accepts the saved measured response", () => {
+    // Arrange
+    const response = co2Fixture;
+
+    // Act
+    const result = co2EmissionsResponseSchema.safeParse(response);
+
+    // Assert
+    expect(result.success).toBe(true);
   });
 
-  it("reject an unknown price area", () => {
-    const broken = {
+  it("accepts the saved forecast response", () => {
+    // Arrange
+    const response = forecastFixture;
+
+    // Act
+    const result = co2EmissionsResponseSchema.safeParse(response);
+
+    // Assert
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects an unknown price area", () => {
+    // Arrange
+    const swedishArea = {
       records: [
         {
           Minutes5UTC: "2026-10-28T11:00:00",
@@ -35,6 +67,11 @@ describe("Energi Data Service schemas", () => {
         },
       ],
     };
-    expect(co2EmissionsResponseSchema.safeParse(broken).success).toBe(false);
+
+    // Act
+    const result = co2EmissionsResponseSchema.safeParse(swedishArea);
+
+    // Assert
+    expect(result.success).toBe(false);
   });
 });

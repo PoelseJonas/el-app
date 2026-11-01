@@ -16,16 +16,7 @@ import {
   dayAheadPricesResponseSchema,
 } from "./schemas";
 
-const DEFAULT_BASE_URL = "https://api.energidataservice.dk";
-
-/** The UTC time column of each dataset, used for sorting. */
-const TIME_COLUMNS = {
-  DayAheadPrices: "TimeUTC",
-  CO2Emis: "Minutes5UTC",
-  CO2EmisProg: "Minutes5UTC",
-} as const;
-
-type Dataset = keyof typeof TIME_COLUMNS;
+// #region Types and settings
 
 export type Fetch = typeof fetch;
 
@@ -39,58 +30,26 @@ export interface EnergiDataOptions {
   baseUrl?: string;
 }
 
-/** "2026-10-28T23:00" in UTC: the format the API takes for `start` and `end`. */
-function toApiTime(date: Date): string {
-  return date.toISOString().slice(0, 16);
+/** What to fetch: a period and a price area. Same for every dataset. */
+interface Query {
+  range: DateRange;
+  area: PriceArea;
 }
 
-export function buildDatasetUrl(
-  baseUrl: string,
-  dataset: Dataset,
-  range: DateRange,
-  area: PriceArea,
-): string {
-  const params = new URLSearchParams({
-    start: toApiTime(range.start),
-    // Like DateRange, the API includes `start` and excludes `end`.
-    end: toApiTime(range.end),
-    filter: JSON.stringify({ PriceArea: [area] }),
-    sort: `${TIME_COLUMNS[dataset]} asc`,
-    // Without this the API reads start/end as Danish time (checked 28.10.2026).
-    timezone: "UTC",
-  });
-  return `${baseUrl}/dataset/${dataset}?${params}`;
-}
+const DEFAULT_BASE_URL = "https://api.energidataservice.dk";
 
-/** Fetches one dataset and validates it, so callers get typed data or a SourceUnavailableError. */
-async function fetchDataset<T>(
-  { fetch: fetchFn = fetch, baseUrl = DEFAULT_BASE_URL }: EnergiDataOptions,
-  dataset: Dataset,
-  schema: z.ZodType<T>,
-  range: DateRange,
-  area: PriceArea,
-): Promise<T> {
-  const source = `energidata/${dataset}`;
-  let response: Response;
-  try {
-    response = await fetchFn(buildDatasetUrl(baseUrl, dataset, range, area));
-  } catch (error) {
-    throw new SourceUnavailableError(source, "network", undefined, {
-      cause: error,
-    });
-  }
-  if (!response.ok) {
-    throw new SourceUnavailableError(source, "http", response.status);
-  }
+/** The UTC time column of each dataset, used for sorting. */
+const TIME_COLUMNS = {
+  DayAheadPrices: "TimeUTC",
+  CO2Emis: "Minutes5UTC",
+  CO2EmisProg: "Minutes5UTC",
+} as const;
 
-  const result = schema.safeParse(await response.json());
-  if (!result.success) {
-    throw new SourceUnavailableError(source, "invalid-response", undefined, {
-      cause: result.error,
-    });
-  }
-  return result.data;
-}
+type Dataset = keyof typeof TIME_COLUMNS;
+
+// #endregion
+
+// #region Public API
 
 /** Spot prices (DayAheadPrices) in DKK/kWh per 15 minutes. */
 export function createEnergiDataPriceSource(
@@ -102,8 +61,7 @@ export function createEnergiDataPriceSource(
         options,
         "DayAheadPrices",
         dayAheadPricesResponseSchema,
-        range,
-        area,
+        { range, area },
       );
       return mapDayAheadPrices(response);
     },
@@ -119,22 +77,12 @@ export function createEnergiDataCo2Source(
 ): Co2Source {
   return {
     async getCo2(range, area) {
+      const query = { range, area };
       const [measured, forecast] = await Promise.all([
-        fetchDataset(
-          options,
-          "CO2Emis",
-          co2EmissionsResponseSchema,
-          range,
-          area,
-        ),
-        fetchDataset(
-          options,
-          "CO2EmisProg",
-          co2EmissionsResponseSchema,
-          range,
-          area,
-        ),
+        fetchDataset(options, "CO2Emis", co2EmissionsResponseSchema, query),
+        fetchDataset(options, "CO2EmisProg", co2EmissionsResponseSchema, query),
       ]);
+
       return mergeMeasuredAndForecast(
         mapCo2Emissions(measured, false),
         mapCo2Emissions(forecast, true),
@@ -142,3 +90,81 @@ export function createEnergiDataCo2Source(
     },
   };
 }
+
+/** The full request URL for one dataset. Exported for tests. */
+export function buildDatasetUrl(
+  baseUrl: string,
+  dataset: Dataset,
+  { range, area }: Query,
+): string {
+  const params = new URLSearchParams({
+    start: toApiTime(range.start),
+    // Like DateRange, the API includes `start` and excludes `end`.
+    end: toApiTime(range.end),
+    filter: JSON.stringify({ PriceArea: [area] }),
+    sort: `${TIME_COLUMNS[dataset]} asc`,
+    // Without this the API reads start/end as Danish time (checked 28.10.2026).
+    timezone: "UTC",
+  });
+  return `${baseUrl}/dataset/${dataset}?${params}`;
+}
+
+// #endregion
+
+// #region Fetching
+
+/**
+ * Fetches one dataset and validates it. Callers get typed data or a SourceUnavailableError,
+ * never a raw network error or unchecked JSON.
+ */
+async function fetchDataset<T>(
+  { fetch: fetchFn = fetch, baseUrl = DEFAULT_BASE_URL }: EnergiDataOptions,
+  dataset: Dataset,
+  schema: z.ZodType<T>,
+  query: Query,
+): Promise<T> {
+  const source = `energidata/${dataset}`;
+  const url = buildDatasetUrl(baseUrl, dataset, query);
+
+  const response = await request(fetchFn, url, source);
+  return validate(schema, await response.json(), source);
+}
+
+/** Calls the API. Network errors and error statuses become a SourceUnavailableError. */
+async function request(
+  fetchFn: Fetch,
+  url: string,
+  source: string,
+): Promise<Response> {
+  let response: Response;
+  try {
+    response = await fetchFn(url);
+  } catch (error) {
+    throw new SourceUnavailableError(source, "network", undefined, {
+      cause: error,
+    });
+  }
+
+  if (!response.ok) {
+    throw new SourceUnavailableError(source, "http", response.status);
+  }
+  return response;
+}
+
+/** Checks the response against its zod schema; an unexpected shape becomes a typed error. */
+function validate<T>(schema: z.ZodType<T>, data: unknown, source: string): T {
+  const result = schema.safeParse(data);
+  if (!result.success) {
+    throw new SourceUnavailableError(source, "invalid-response", undefined, {
+      cause: result.error,
+    });
+  }
+  return result.data;
+}
+
+/** "2026-10-28T23:00" in UTC: the format the API takes for `start` and `end`. */
+function toApiTime(date: Date): string {
+  return date.toISOString().slice(0, 16);
+}
+
+// #endregion

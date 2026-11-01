@@ -35,28 +35,41 @@ export function SegmentedControl({
           {legend}
         </legend>
         <div className="grid auto-cols-fr grid-flow-col gap-1 rounded-xl bg-muted p-1">
-          {options.map((option) => {
-            const selected = option.value === value;
-            return (
-              <button
-                key={option.value}
-                type="submit"
-                name={name}
-                value={option.value}
-                aria-pressed={selected}
-                className={cn(
-                  // min-h-11 (2.75rem) is the touch target size from docs/design.md (Fitts' law).
-                  "min-h-11 rounded-lg px-3 text-subheadline text-muted-foreground transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                  selected &&
-                    "bg-background font-medium text-foreground shadow-sm",
-                )}
-              >
-                {option.label}
-              </button>
-            );
-          })}
+          {options.map((option) => (
+            <Segment
+              key={option.value}
+              name={name}
+              option={option}
+              selected={option.value === value}
+            />
+          ))}
         </div>
       </fieldset>
     </form>
+  );
+}
+
+interface SegmentProps {
+  name: string;
+  option: SegmentedControlOption;
+  selected: boolean;
+}
+
+/** One choice. Submitting it sends `name=option.value` to the form's action. */
+function Segment({ name, option, selected }: SegmentProps) {
+  return (
+    <button
+      type="submit"
+      name={name}
+      value={option.value}
+      aria-pressed={selected}
+      className={cn(
+        // min-h-11 (2.75rem) is the touch target size from docs/design.md (Fitts' law).
+        "min-h-11 rounded-lg px-3 text-subheadline text-muted-foreground transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+        selected && "bg-background font-medium text-foreground shadow-sm",
+      )}
+    >
+      {option.label}
+    </button>
   );
 }

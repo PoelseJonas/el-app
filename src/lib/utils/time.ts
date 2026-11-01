@@ -3,56 +3,13 @@
 
 import type { DateRange } from "@/lib/domain/types";
 
-/** The time zone the app shows times in. */
-export const DANISH_TIME_ZONE = "Europe/Copenhagen";
-
 const MS_PER_MINUTE = 60_000;
 const MS_PER_HOUR = 60 * MS_PER_MINUTE;
 
-/** How many minutes `timeZone` is ahead of UTC at `instant` (Copenhagen: 60 in winter, 120 in summer). */
-function offsetMinutes(instant: Date, timeZone: string): number {
-  const name = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    timeZoneName: "longOffset",
-  })
-    .formatToParts(instant)
-    .find((part) => part.type === "timeZoneName")?.value;
-  // "GMT+01:00", or just "GMT" when the offset is zero.
-  const match = /GMT([+-])(\d{2}):(\d{2})/.exec(name ?? "");
-  if (!match) return 0;
-  const minutes = Number(match[2]) * 60 + Number(match[3]);
-  return match[1] === "-" ? -minutes : minutes;
-}
+// #region Public API
 
-/** The calendar date at `instant` in `timeZone`. Month is 1-12. */
-function localDate(instant: Date, timeZone: string) {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-  }).formatToParts(instant);
-  const get = (type: Intl.DateTimeFormatPartTypes) =>
-    Number(parts.find((part) => part.type === type)?.value);
-  return { year: get("year"), month: get("month"), day: get("day") };
-}
-
-/** The UTC instant of local midnight. `day` may overflow (32 → next month); Date.UTC handles it. */
-function startOfLocalDay(
-  year: number,
-  month: number,
-  day: number,
-  timeZone: string,
-): Date {
-  const utcMidnight = Date.UTC(year, month - 1, day);
-  const guess =
-    utcMidnight -
-    offsetMinutes(new Date(utcMidnight), timeZone) * MS_PER_MINUTE;
-  // Use the offset at local midnight itself, which can differ from the guess on DST days.
-  return new Date(
-    utcMidnight - offsetMinutes(new Date(guess), timeZone) * MS_PER_MINUTE,
-  );
-}
+/** The time zone the app shows times in. */
+export const DANISH_TIME_ZONE = "Europe/Copenhagen";
 
 /**
  * The local calendar day containing `instant`, moved by `dayOffset` days (1 = tomorrow),
@@ -64,9 +21,11 @@ export function dayRange(
   timeZone = DANISH_TIME_ZONE,
 ): DateRange {
   const { year, month, day } = localDate(instant, timeZone);
+  const firstDay = day + dayOffset;
+
   return {
-    start: startOfLocalDay(year, month, day + dayOffset, timeZone),
-    end: startOfLocalDay(year, month, day + dayOffset + 1, timeZone),
+    start: localMidnight(year, month, firstDay, timeZone),
+    end: localMidnight(year, month, firstDay + 1, timeZone),
   };
 }
 
@@ -75,10 +34,81 @@ export function dayRange(
  * because Danish time is always a whole number of hours from UTC.
  */
 export function startOfHour(instant: Date): Date {
-  return new Date(Math.floor(instant.getTime() / MS_PER_HOUR) * MS_PER_HOUR);
+  const wholeHours = Math.floor(instant.getTime() / MS_PER_HOUR);
+  return new Date(wholeHours * MS_PER_HOUR);
 }
 
 /** The hour after `start`. */
 export function addHour(start: Date): Date {
   return new Date(start.getTime() + MS_PER_HOUR);
 }
+
+/** Sort comparator: earliest `start` first. Use as `items.sort(compareByStart)`. */
+export function compareByStart(a: { start: Date }, b: { start: Date }): number {
+  return a.start.getTime() - b.start.getTime();
+}
+
+// #endregion
+
+// #region Helpers
+
+/** The calendar date at `instant` in `timeZone`. Month is 1-12. */
+function localDate(instant: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  }).formatToParts(instant);
+
+  const partAsNumber = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((part) => part.type === type)?.value);
+
+  return {
+    year: partAsNumber("year"),
+    month: partAsNumber("month"),
+    day: partAsNumber("day"),
+  };
+}
+
+/**
+ * The UTC instant of local midnight on the given date. `day` may overflow
+ * (32 October → 1 November); Date.UTC handles that.
+ */
+function localMidnight(
+  year: number,
+  month: number,
+  day: number,
+  timeZone: string,
+): Date {
+  const utcMidnight = Date.UTC(year, month - 1, day);
+
+  // The offset at UTC midnight is a first guess. On DST days the offset at local midnight
+  // can differ, so the guess is used to look up the real one.
+  const firstGuess = utcMidnight - offsetAt(utcMidnight, timeZone);
+  return new Date(utcMidnight - offsetAt(firstGuess, timeZone));
+}
+
+/** How far `timeZone` is ahead of UTC at `time`, in ms (Copenhagen: 1 h in winter, 2 h in summer). */
+function offsetAt(time: number, timeZone: string): number {
+  const offsetName = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    timeZoneName: "longOffset",
+  })
+    .formatToParts(new Date(time))
+    .find((part) => part.type === "timeZoneName")?.value;
+
+  return parseGmtOffsetMinutes(offsetName ?? "GMT") * MS_PER_MINUTE;
+}
+
+/** "GMT+01:00" → 60, "GMT-03:30" → -210, "GMT" (UTC itself) → 0. */
+function parseGmtOffsetMinutes(offsetName: string): number {
+  const match = /GMT([+-])(\d{2}):(\d{2})/.exec(offsetName);
+  if (!match) return 0;
+
+  const [, sign, hours, minutes] = match;
+  const totalMinutes = Number(hours) * 60 + Number(minutes);
+  return sign === "-" ? -totalMinutes : totalMinutes;
+}
+
+// #endregion
