@@ -1,4 +1,8 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+// Connects next-intl; it finds the request config in src/i18n/request.ts.
+const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
   // Enables "use cache" and Partial Prerendering: static parts of a page are prerendered,
@@ -17,4 +21,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

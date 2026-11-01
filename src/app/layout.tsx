@@ -1,29 +1,62 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
+import { cookies } from "next/headers";
+import { cn } from "cn";
+import { AppShell } from "@/components/layout/app-shell";
+import {
+  defaultTheme,
+  isTheme,
+  themeClassName,
+  themeCookieName,
+} from "@/components/layout/theme";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// Inter comes with the shadcn "luma" style. It is exposed as --font-sans, which
+// globals.css maps to Tailwind's font-sans.
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "El-app",
   description: "Dit elforbrug, elpris og CO2-udledning time for time",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+// "cover" lets the page extend under the iPhone home indicator, so
+// env(safe-area-inset-bottom) in the bottom nav gets a real value.
+export const viewport: Viewport = {
+  viewportFit: "cover",
+};
+
+// The language comes from a cookie or the Accept-Language header (src/i18n/request.ts), so
+// every page depends on the request and cannot be prerendered. With cacheComponents on,
+// Next.js requires opting into that explicitly ("blocking route"). The alternative is the
+// language in the URL (/da/..., /en/...), see docs/architecture.md.
+export const instant = false;
+
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // The language picked in src/i18n/request.ts, so screen readers and the browser know it.
+  const locale = await getLocale();
+  // Read on the server so the first paint has the right theme. Costs nothing extra: the page
+  // is already dynamic because of the language cookie (see `instant` above).
+  const savedTheme = (await cookies()).get(themeCookieName)?.value;
+  const theme = isTheme(savedTheme) ? savedTheme : defaultTheme;
+
   return (
     <html
-      lang="da"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang={locale}
+      className={cn(
+        inter.variable,
+        "h-full antialiased",
+        themeClassName(theme),
+      )}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {/* Makes the messages available to client components (useTranslations). */}
+        <NextIntlClientProvider>
+          <AppShell>{children}</AppShell>
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
 }

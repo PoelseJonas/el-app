@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dkkPerMwhToDkkPerKwh } from "./units";
+import { dkkPerMwhToDkkPerKwh } from "@/lib/utils/units";
 
 describe("dkkPerMwhToDkkPerKwh", () => {
   it("converts DKK/MWh to DKK/kWh", () => {

@@ -8,6 +8,11 @@ on:
   push:
     branches: [staging, main]
 
+# CI only needs to read the code. Stated here so it stays read-only even if the
+# repository's default token permissions are changed.
+permissions:
+  contents: read
+
 # A newer run on the same PR or branch cancels the older one.
 concurrency:
   group: ci-${{ github.ref }}
@@ -35,3 +40,25 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  e2e:
+    # Separate job, so it runs in parallel with the checks above and a failure is easy to spot.
+    # To make it required, add this exact name to the branch rules on GitHub.
+    name: End-to-end tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+      # Only Chromium (both projects in playwright.config.ts use it), plus the Linux
+      # libraries it needs.
+      - run: npx playwright install --with-deps chromium
+      # playwright.config.ts builds the app and starts it against the fixture server,
+      # so CI never calls the real Energi Data Service.
+      - run: npm run test:e2e

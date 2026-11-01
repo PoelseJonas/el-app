@@ -1,0 +1,56 @@
+{
+  "nav": {
+    "label": "Hovedmenu",
+    "appName": "El-app",
+    "today": "I dag",
+    "usage": "Forbrug",
+    "insights": "Indsigt",
+    "settings": "Indstillinger"
+  },
+  "today": {
+    "title": "I dag",
+    "now": "Lige nu",
+    "spotPrice": "Spotpris",
+    "co2": "CO2",
+    "spotPriceNote": "Spotpris uden nettarif, afgifter og moms.",
+    "priceChart": "Spotpris pr. time i dag",
+    "co2Chart": "CO2 pr. time i dag",
+    "co2ForecastNote": "Svagere søjler er en prognose.",
+    "hourHeading": "Time",
+    "hourRange": "kl. {from}-{to}",
+    "cheapestHours": "De billigste timer",
+    "greenestHours": "De grønneste timer",
+    "noHoursLeft": "Der er ikke flere timer i dag.",
+    "noData": "Der er ingen priser for i dag endnu. Prøv igen senere."
+  },
+  "usage": {
+    "title": "Forbrug",
+    "placeholder": "Her kommer dit forbrug pr. time for de sidste 7 dage."
+  },
+  "insights": {
+    "title": "Indsigt",
+    "placeholder": "Her kommer dine dyreste og mest beskidte timer."
+  },
+  "settings": {
+    "title": "Indstillinger",
+    "language": {
+      "label": "Sprog",
+      "da": "Dansk",
+      "en": "English"
+    },
+    "theme": {
+      "label": "Udseende",
+      "system": "System",
+      "light": "Lys",
+      "dark": "Mørk"
+    }
+  },
+  "units": {
+    "dkkPerKwh": "{value} kr./kWh",
+    "gramCo2PerKwh": "{value} g CO2/kWh"
+  },
+  "errors": {
+    "sourceUnavailable": "Priser og CO2 kunne ikke hentes lige nu.",
+    "retry": "Prøv igen"
+  }
+}
