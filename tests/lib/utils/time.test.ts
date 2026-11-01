@@ -3,6 +3,8 @@ import {
   addHour,
   compareByStart,
   dayRange,
+  hourStartsIn,
+  localHour,
   startOfHour,
 } from "@/lib/utils/time";
 
@@ -136,5 +138,70 @@ describe("compareByStart", () => {
 
     // Assert
     expect(sorted.map((item) => item.start.getUTCHours())).toEqual([10, 12]);
+  });
+});
+
+describe("localHour", () => {
+  it("gives the Danish clock hour in winter time (UTC+1)", () => {
+    // Arrange
+    const halfPastFiveUtc = new Date("2026-10-28T17:30:00Z");
+
+    // Act
+    const hour = localHour(halfPastFiveUtc);
+
+    // Assert
+    expect(hour).toBe(18);
+  });
+
+  it("gives the Danish clock hour in summer time (UTC+2)", () => {
+    // Arrange
+    const halfPastFiveUtc = new Date("2026-07-01T17:30:00Z");
+
+    // Act
+    const hour = localHour(halfPastFiveUtc);
+
+    // Assert
+    expect(hour).toBe(19);
+  });
+
+  it("gives 0, not 24, just after midnight", () => {
+    // Arrange
+    const justAfterDanishMidnight = new Date("2026-10-28T23:05:00Z");
+
+    // Act
+    const hour = localHour(justAfterDanishMidnight);
+
+    // Assert
+    expect(hour).toBe(0);
+  });
+});
+
+describe("hourStartsIn", () => {
+  it("lists every hour start, excluding the end", () => {
+    // Arrange
+    const threeHours = {
+      start: new Date("2026-10-28T10:00:00Z"),
+      end: new Date("2026-10-28T13:00:00Z"),
+    };
+
+    // Act
+    const starts = hourStartsIn(threeHours);
+
+    // Assert
+    expect(starts.map((start) => start.getUTCHours())).toEqual([10, 11, 12]);
+  });
+
+  it("returns nothing for an empty range", () => {
+    // Arrange
+    const sameStartAndEnd = {
+      start: new Date("2026-10-28T10:00:00Z"),
+      end: new Date("2026-10-28T10:00:00Z"),
+    };
+
+    // Act
+    const starts = hourStartsIn(sameStartAndEnd);
+
+    // Assert
+    expect(starts).toEqual([]);
   });
 });

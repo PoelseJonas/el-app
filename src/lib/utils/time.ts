@@ -48,6 +48,29 @@ export function compareByStart(a: { start: Date }, b: { start: Date }): number {
   return a.start.getTime() - b.start.getTime();
 }
 
+/** The clock hour (0-23) at `instant` in `timeZone`, e.g. 18 for 17:30 UTC in Danish winter time. */
+export function localHour(instant: Date, timeZone = DANISH_TIME_ZONE): number {
+  const hour = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "numeric",
+    hourCycle: "h23",
+  }).format(instant);
+  return Number(hour);
+}
+
+/** Every hour start from `range.start` up to (not including) `range.end`. */
+export function hourStartsIn(range: DateRange): Date[] {
+  const starts: Date[] = [];
+  for (
+    let start = startOfHour(range.start);
+    start < range.end;
+    start = addHour(start)
+  ) {
+    starts.push(start);
+  }
+  return starts;
+}
+
 // #endregion
 
 // #region Helpers
